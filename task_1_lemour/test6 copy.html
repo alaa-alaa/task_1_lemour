@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Fitness App</title>
+    <style>
+        /* Styling for the Fitness App */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h2,
+        h3,
+        h4 {
+            color: #343a40;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="my-4">Advanced Personalized Workout Plan</h2>
+
+        <!-- Authentication Section -->
+        <div id="auth-section" class="mb-4">
+            <h3>Register / Login</h3>
+            <label>Email: </label><input id="email" type="text" class="form-control mb-2">
+            <label>Password: </label><input id="password" type="password" class="form-control mb-2">
+            <button onclick="register()" class="btn btn-primary">Register</button>
+            <button onclick="login()" class="btn btn-success">Login</button>
+        </div>
+
+        <!-- User Info Section -->
+        <div id="user-info-section" class="hidden">
+            <h4>Select Your Goal:</h4>
+            <label><input type="radio" name="goal" value="lose weight"> Lose Weight</label><br>
+            <label><input type="radio" name="goal" value="build muscle"> Build Muscle</label><br>
+            <label><input type="radio" name="goal" value="improve endurance"> Improve Endurance</label><br>
+
+            <h4>Experience Level:</h4>
+            <label><input type="radio" name="experience" value="beginner"> Beginner</label><br>
+            <label><input type="radio" name="experience" value="intermediate"> Intermediate</label><br>
+            <label><input type="radio" name="experience" value="advanced"> Advanced</label><br>
+
+            <h4>Equipment Available:</h4>
+            <label><input type="checkbox" name="equipment" value="weights"> Weights</label><br>
+            <label><input type="checkbox" name="equipment" value="resistance bands"> Resistance Bands</label><br>
+            <label><input type="checkbox" name="equipment" value="bodyweight"> Bodyweight Only</label><br>
+
+            <button onclick="initWorkout()" class="btn btn-primary mt-2">Get Workout Plan</button>
+        </div>
+
+        <!-- Workout Plan Section -->
+        <div id="workout-plan-section" class="mt-4 hidden"></div>
+
+        <!-- Progress Log Section -->
+        <div id="progress-log-section" class="mt-4 hidden">
+            <h3>Log Workout Progress</h3>
+            <label>Exercise: </label><input id="log-exercise" type="text" class="form-control mb-2">
+            <label>Sets Completed: </label><input id="log-sets" type="number" class="form-control mb-2">
+            <label>Reps Completed: </label><input id="log-reps" type="number" class="form-control mb-2">
+            <button onclick="logProgress()" class="btn btn-success mt-2">Log Progress</button>
+            <button onclick="viewProgress()" class="btn btn-info mt-2">View Progress</button>
+        </div>
+
+        <!-- Progress Display Section -->
+        <div id="progress-display" class="mt-4 hidden"></div>
+    </div>
+
+    <script>
+
+        let user = null;  // Holds the logged-in user's info
+        const workoutPlans = {};  // Stores workout plans for users
+        const progressLog = [];  // Stores progress logs for workouts
+
+        /**
+         * Validates if the provided email format is correct.
+         * @param {string} email - The email address entered by the user.
+         * @returns {boolean} - Returns true if email format is valid; otherwise, false.
+         */
+        function isValidEmail(email) {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailPattern.test(email);
+        }
+
+        /**
+         * Registers a new user with email and password.
+         */
+        function register() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            if (!email || !isValidEmail(email)) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+            if (!password) {
+                alert("Please enter a password.");
+                return;
+            }
+
+            // Save user credentials in localStorage
+            localStorage.setItem(email, JSON.stringify({ email, password }));
+            alert("Registration successful. Please log in.");
+        }
+
+        /**
+         * Logs in a user by verifying email and password from localStorage.
+         */
+        function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            if (!email || !isValidEmail(email)) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+            if (!password) {
+                alert("Please enter a password.");
+                return;
+            }
+
+            const storedUser = JSON.parse(localStorage.getItem(email));
+            if (storedUser && storedUser.password === password) {
+                user = storedUser;
+                alert("Login successful!");
+                document.getElementById("auth-section").classList.add("hidden");
+                document.getElementById("user-info-section").classList.remove("hidden");
+                document.getElementById("progress-log-section").classList.remove("hidden");
+            } else {
+                alert("Incorrect email or password.");
+            }
+        }
+
+        /**
+         * Retrieves the user's selected goal, experience level, and equipment.
+         * @returns {Object|null} - Object containing user selections or null if invalid.
+         */
+        function getUserInfo() {
+            const goal = document.querySelector("input[name='goal']:checked");
+            const experience = document.querySelector("input[name='experience']:checked");
+            const equipment = Array.from(document.querySelectorAll("input[name='equipment']:checked")).map(el => el.value);
+
+            if (!goal || !experience || equipment.length === 0) {
+                alert("Please select all options.");
+                return null;
+            }
+            return { goal: goal.value, experience: experience.value, equipment };
+        }
+
+        /**
+         * Generates a workout plan based on user goal, experience, and equipment.
+         * @param {Object} userInfo - Contains goal, experience level, and equipment options.
+         * @returns {Array} - Array of workout exercises tailored to the user's preferences.
+         */
+        function generateWorkoutPlan(userInfo) {
+            const workoutPlan = [];
+
+            if (userInfo.goal === "build muscle") {
+                workoutPlan.push({ exercise: "Push-ups", reps: userInfo.experience === "beginner" ? 10 : 20, sets: 3 });
+                workoutPlan.push({ exercise: "Bench Press", reps: 8, sets: 4 });
+            } else if (userInfo.goal === "lose weight") {
+                workoutPlan.push({ exercise: "Burpees", reps: userInfo.experience === "beginner" ? 10 : 15, sets: 3 });
+                workoutPlan.push({ exercise: "Mountain Climbers", reps: 30, sets: 3 });
+            }
+
+            userInfo.equipment.forEach(eq => {
+                if (eq === "weights") workoutPlan.push({ exercise: "Dumbbell Squats", reps: 12, sets: 3 });
+                else if (eq === "resistance bands") workoutPlan.push({ exercise: "Band Rows", reps: 15, sets: 3 });
+                else if (eq === "bodyweight") workoutPlan.push({ exercise: "Plank", reps: 1, sets: 3, time: "60s" });
+            });
+
+            workoutPlans[user.email] = workoutPlan;
+            return workoutPlan;
+        }
+
+        /**
+         * Displays the generated workout plan on the screen.
+         * @param {Array} workoutPlan - Array containing the generated workout plan exercises.
+         */
+        function displayWorkoutPlan(workoutPlan) {
+            const workoutSection = document.getElementById("workout-plan-section");
+            workoutSection.innerHTML = "<h3>Your Workout Plan</h3>";
+            workoutPlan.forEach((exercise, idx) => {
+                workoutSection.innerHTML += `
+                    <p><b>${idx + 1}. ${exercise.exercise}</b>: ${exercise.reps} reps x ${exercise.sets} sets</p>`;
+            });
+            workoutSection.classList.remove("hidden");
+        }
+
+        /**
+         * Initializes the workout process by generating and displaying the workout plan.
+         */
+        function initWorkout() {
+            const userInfo = getUserInfo();
+            if (userInfo) {
+                const workoutPlan = generateWorkoutPlan(userInfo);
+                displayWorkoutPlan(workoutPlan);
+            }
+        }
+
+        /**
+         * Logs the user's completed sets and reps for an exercise.
+         */
+        function logProgress() {
+            const exercise = document.getElementById("log-exercise").value;
+            const sets = parseInt(document.getElementById("log-sets").value);
+            const reps = parseInt(document.getElementById("log-reps").value);
+            if (!exercise || isNaN(sets) || isNaN(reps)) {
+                alert("Please fill out all fields.");
+                return;
+            }
+            progressLog.push({ exercise, sets, reps, date: new Date().toLocaleDateString() });
+            alert("Progress logged!");
+        }
+
+        /**
+         * Displays the user's logged workout progress.
+         */
+        function viewProgress() {
+            const progressDisplay = document.getElementById("progress-display");
+            progressDisplay.innerHTML = "<h3>Progress Log</h3>";
+            progressLog.forEach((log, idx) => {
+                progressDisplay.innerHTML += `
+                    <p><b>${idx + 1}. ${log.exercise}</b>: ${log.sets} sets x ${log.reps} reps on ${log.date}</p>`;
+            });
+            progressDisplay.classList.remove("hidden");
+        }
+    </script>
+</body>
+
+</html>

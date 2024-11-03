@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Fitness App</title>
+    <style>
+        /* Styling remains the same */
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="my-4">Advanced Personalized Workout Plan</h2>
+
+        <!-- Register/Login Section -->
+        <div id="auth-section" class="mb-4">
+            <!-- Existing HTML for registration and login -->
+        </div>
+
+        <!-- User Info Section -->
+        <div id="user-info-section" class="hidden">
+            <!-- Existing HTML for goal, experience, and equipment selection -->
+            <button onclick="initWorkout()" class="btn btn-primary mt-2">Get Workout Plan</button>
+        </div>
+
+        <!-- Workout Plan Section -->
+        <div id="workout-plan-section" class="mt-4 hidden"></div>
+
+        <!-- Custom Workout Section -->
+        <div id="custom-workout-section" class="mt-4 hidden">
+            <h3>Add Custom Exercise</h3>
+            <label>Exercise Name: </label><input id="custom-exercise-name" type="text" class="form-control mb-2">
+            <label>Sets: </label><input id="custom-exercise-sets" type="number" class="form-control mb-2">
+            <label>Reps: </label><input id="custom-exercise-reps" type="number" class="form-control mb-2">
+            <label>Notes: </label><input id="custom-exercise-notes" type="text" class="form-control mb-2">
+            <button onclick="addCustomExercise()" class="btn btn-info">Add Exercise</button>
+        </div>
+
+        <!-- Calorie Tracking Section -->
+        <div id="calorie-tracking-section" class="mt-4 hidden">
+            <h3>Calorie Tracking</h3>
+            <label>Daily Calorie Target: </label><input id="calorie-target" type="number" class="form-control mb-2">
+            <label>Calories Consumed Today: </label><input id="calories-consumed" type="number"
+                class="form-control mb-2">
+            <button onclick="trackCalories()" class="btn btn-danger">Track Calories</button>
+            <div id="calorie-display" class="mt-2"></div>
+        </div>
+
+        <!-- Progress Log Section -->
+        <div id="progress-log-section" class="mt-4 hidden">
+            <!-- Existing HTML for logging workout progress -->
+        </div>
+
+        <div id="progress-display" class="mt-4 hidden"></div>
+    </div>
+
+    <script>
+        let user = null;
+        const workoutPlans = {};
+        const progressLog = [];
+        const customExercises = [];
+        let calorieBalance = 0;
+
+        // Existing register, login, user info, workout generation, and display functions
+
+        // Add Custom Exercise Function
+        function addCustomExercise() {
+            const name = document.getElementById("custom-exercise-name").value;
+            const sets = parseInt(document.getElementById("custom-exercise-sets").value);
+            const reps = parseInt(document.getElementById("custom-exercise-reps").value);
+            const notes = document.getElementById("custom-exercise-notes").value;
+
+            if (!name || isNaN(sets) || isNaN(reps)) {
+                alert("Please complete all fields for the custom exercise.");
+                return;
+            }
+
+            customExercises.push({ name, sets, reps, notes });
+            displayWorkoutPlan(workoutPlans[user.email]);
+            document.getElementById("custom-exercise-name").value = '';
+            document.getElementById("custom-exercise-sets").value = '';
+            document.getElementById("custom-exercise-reps").value = '';
+            document.getElementById("custom-exercise-notes").value = '';
+            alert("Custom exercise added!");
+        }
+
+        // Modified displayWorkoutPlan to include custom exercises
+        function displayWorkoutPlan(workoutPlan) {
+            const workoutSection = document.getElementById("workout-plan-section");
+            workoutSection.innerHTML = "<h3>Your Workout Plan:</h3>";
+            workoutPlan.forEach(exercise => {
+                workoutSection.innerHTML += `<p>${exercise.exercise}: ${exercise.sets} sets of ${exercise.reps || exercise.time} reps</p>`;
+            });
+            customExercises.forEach(exercise => {
+                workoutSection.innerHTML += `<p>${exercise.name}: ${exercise.sets} sets of ${exercise.reps} reps <i>${exercise.notes ? " - " + exercise.notes : ""}</i></p>`;
+            });
+            workoutSection.classList.remove("hidden");
+        }
+
+        // Calorie Tracking Function
+        function trackCalories() {
+            const calorieTarget = parseInt(document.getElementById("calorie-target").value);
+            const caloriesConsumed = parseInt(document.getElementById("calories-consumed").value);
+
+            if (isNaN(calorieTarget) || isNaN(caloriesConsumed)) {
+                alert("Please enter valid numbers for calorie target and calories consumed.");
+                return;
+            }
+
+            calorieBalance = calorieTarget - caloriesConsumed;
+            document.getElementById("calorie-display").innerHTML = `Calorie Balance: ${calorieBalance >= 0 ? calorieBalance + " calories left" : "Over target by " + Math.abs(calorieBalance) + " calories"}`;
+            alert("Calories tracked successfully!");
+        }
+
+    </script>
+</body>
+
+</html>

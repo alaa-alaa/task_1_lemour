@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Fitness Tracker App</title>
+    <style>
+        /* Additional styles */
+        .section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="my-4">Advanced Fitness Tracker</h2>
+
+        <!-- Goal Tracking Section -->
+        <div id="goal-tracking-section" class="section">
+            <h3>Track Your Goal Progress</h3>
+            <label>Log Your Current Weight (kg): </label><input id="log-weight" type="number" class="form-control mb-2">
+            <label>Log Muscle Measurement (cm): </label><input id="log-muscle" type="number" class="form-control mb-2">
+            <button onclick="logGoalProgress()" class="btn btn-success mt-2">Log Progress</button>
+            <canvas id="progress-graph" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Workout Streak Section -->
+        <div id="workout-streak-section" class="section">
+            <h3>Workout Streak: <span id="current-streak">0</span> Days</h3>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div id="leaderboard-section" class="section">
+            <h3>Leaderboard - Top Weekly Completions</h3>
+            <div id="leaderboard"></div>
+        </div>
+
+        <!-- Custom Workout Section -->
+        <div id="custom-workout-section" class="section">
+            <h3>Add Custom Workout</h3>
+            <label>Exercise Name: </label><input id="custom-exercise-name" type="text" class="form-control mb-2">
+            <label>Reps: </label><input id="custom-reps" type="number" class="form-control mb-2">
+            <label>Sets: </label><input id="custom-sets" type="number" class="form-control mb-2">
+            <label>Notes: </label><textarea id="custom-notes" class="form-control mb-2"></textarea>
+            <button onclick="addCustomWorkout()" class="btn btn-info mt-2">Add Custom Workout</button>
+        </div>
+
+        <!-- Calorie Tracking Section -->
+        <div id="calorie-tracking-section" class="section">
+            <h3>Calorie Tracking</h3>
+            <label>Calories Consumed Today: </label><input id="calories-today" type="number" class="form-control mb-2">
+            <button onclick="logCalories()" class="btn btn-success mt-2">Log Calories</button>
+            <div id="calorie-balance" class="mt-2"></div>
+        </div>
+
+        <!-- Reminder Section -->
+        <div id="reminder-section" class="section">
+            <h3>Set Reminders</h3>
+            <label>Reminder Time: </label><input id="reminder-time" type="time" class="form-control mb-2">
+            <button onclick="setReminder()" class="btn btn-primary mt-2">Set Reminder</button>
+            <div id="reminder-message" class="mt-2"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let goalProgress = [];
+        let workoutStreak = 0;
+        let leaderboard = [];
+        let caloriesLog = [];
+        let reminderInterval;
+
+        // Goal Progress Tracking and Graph
+        function logGoalProgress() {
+            const weight = document.getElementById("log-weight").value;
+            const muscle = document.getElementById("log-muscle").value;
+            if (weight && muscle) {
+                goalProgress.push({ weight, muscle, date: new Date().toLocaleDateString() });
+                alert("Progress logged!");
+                displayProgressGraph();
+            } else {
+                alert("Please enter weight and muscle measurement.");
+            }
+        }
+
+        function displayProgressGraph() {
+            const ctx = document.getElementById("progress-graph").getContext("2d");
+            const weights = goalProgress.map(log => log.weight);
+            const dates = goalProgress.map(log => log.date);
+            const muscle = goalProgress.map(log => log.muscle);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        { label: "Weight (kg)", data: weights, borderColor: "blue", fill: false },
+                        { label: "Muscle (cm)", data: muscle, borderColor: "green", fill: false }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // Workout Completion Streaks
+        function incrementStreak() {
+            workoutStreak++;
+            document.getElementById("current-streak").innerText = workoutStreak;
+        }
+
+        function resetStreak() {
+            workoutStreak = 0;
+            document.getElementById("current-streak").innerText = workoutStreak;
+        }
+
+        // Leaderboard and Social Sharing
+        function updateLeaderboard(username) {
+            let user = leaderboard.find(entry => entry.name === username);
+            if (user) {
+                user.completions++;
+            } else {
+                leaderboard.push({ name: username, completions: 1 });
+            }
+            leaderboard.sort((a, b) => b.completions - a.completions);
+            displayLeaderboard();
+        }
+
+        function displayLeaderboard() {
+            const leaderboardDiv = document.getElementById("leaderboard");
+            leaderboardDiv.innerHTML = leaderboard.slice(0, 5).map((entry, index) =>
+                `<p>${index + 1}. ${entry.name}: ${entry.completions} completions</p>`
+            ).join("");
+        }
+
+        function shareMilestone(milestone) {
+            alert(`Shared: "I just reached ${milestone} workout completions! #FitnessGoals"`);
+        }
+
+        // Custom Workout Feature
+        function addCustomWorkout() {
+            const name = document.getElementById("custom-exercise-name").value;
+            const reps = document.getElementById("custom-reps").value;
+            const sets = document.getElementById("custom-sets").value;
+            const notes = document.getElementById("custom-notes").value;
+            if (name && reps && sets) {
+                alert(`Custom workout added: ${name}, ${reps} reps x ${sets} sets. Notes: ${notes}`);
+            } else {
+                alert("Please fill in all required fields for custom workout.");
+            }
+        }
+
+        // Calorie Tracking for Weight Goals
+        function logCalories() {
+            const calories = document.getElementById("calories-today").value;
+            if (calories) {
+                caloriesLog.push({ calories, date: new Date().toLocaleDateString() });
+                calculateCalorieBalance();
+                alert("Calories logged!");
+            } else {
+                alert("Please enter the calories consumed.");
+            }
+        }
+
+        function calculateCalorieBalance() {
+            const calorieBalanceDiv = document.getElementById("calorie-balance");
+            const targetCalories = 2000; // Example target for weight goal
+            const recentCalories = caloriesLog[caloriesLog.length - 1].calories;
+            const balance = targetCalories - recentCalories;
+            calorieBalanceDiv.innerText = `Today's calorie balance: ${balance} kcal (${balance >= 0 ? "Deficit" : "Surplus"})`;
+        }
+
+        // Notifications or Reminders
+        function setReminder() {
+            const reminderTime = document.getElementById("reminder-time").value;
+            if (!reminderTime) {
+                alert("Please set a valid time for the reminder.");
+                return;
+            }
+
+            clearInterval(reminderInterval);
+            reminderInterval = setInterval(() => {
+                const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                if (currentTime === reminderTime) {
+                    alert("Time to log your workout or progress!");
+                    clearInterval(reminderInterval);
+                }
+            }, 60000);  // Check every minute
+            document.getElementById("reminder-message").innerText = `Reminder set for ${reminderTime}`;
+        }
+    </script>
+</body>
+
+</html>

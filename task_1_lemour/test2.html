@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Fitness App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="my-4">Advanced Personalized Workout Plan</h2>
+        <!-- Registration/Login Section -->
+        <div id="auth-section" class="mb-4">
+            <h3>Register / Login</h3>
+            <label>Email: </label><input id="email" type="text" class="form-control mb-2">
+            <label>Password: </label><input id="password" type="password" class="form-control mb-2">
+            <button onclick="register()" class="btn btn-primary">Register</button>
+            <button onclick="login()" class="btn btn-success">Login</button>
+        </div>
+
+        <!-- User Information Input Section -->
+        <div id="user-info-section" class="hidden">
+            <label>Goal: </label><input id="goal" type="text" class="form-control mb-2"
+                placeholder="e.g., lose weight, build muscle">
+            <label>Experience Level: </label><input id="experience" type="text" class="form-control mb-2"
+                placeholder="beginner, intermediate, advanced">
+            <label>Equipment: </label><input id="equipment" type="text" class="form-control mb-2"
+                placeholder="e.g., weights, resistance bands, bodyweight only">
+            <button onclick="initWorkout()" class="btn btn-primary mt-2">Get Workout Plan</button>
+        </div>
+        <!-- Workout Plan Display Section -->
+        <div id="workout-plan-section" class="mt-4 hidden"></div>
+        <!-- Progress Tracking Section -->
+        <div id="progress-log-section" class="mt-4 hidden">
+            <h3>Log Workout Progress</h3>
+            <label>Exercise: </label><input id="log-exercise" type="text" class="form-control mb-2">
+            <label>Sets Completed: </label><input id="log-sets" type="number" class="form-control mb-2">
+            <label>Reps Completed: </label><input id="log-reps" type="number" class="form-control mb-2">
+            <button onclick="logProgress()" class="btn btn-success mt-2">Log Progress</button>
+            <button onclick="viewProgress()" class="btn btn-info mt-2">View Progress</button>
+        </div>
+        <div id="progress-display" class="mt-4 hidden"></div>
+    </div>
+
+    <script>
+        // Mock Database (Local Storage)
+        let user = null;
+        const workoutPlans = {};
+        const progressLog = [];
+
+        // Register User
+        function register() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            if (email && password) {
+                localStorage.setItem(email, JSON.stringify({ email, password }));
+                alert("Registration successful. Please log in.");
+            } else {
+                alert("Please fill in both fields.");
+            }
+        }
+
+        // Login User
+        function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const storedUser = JSON.parse(localStorage.getItem(email));
+            if (storedUser && storedUser.password === password) {
+                user = storedUser;
+                alert("Login successful!");
+                document.getElementById("auth-section").classList.add("hidden");
+                document.getElementById("user-info-section").classList.remove("hidden");
+                document.getElementById("progress-log-section").classList.remove("hidden");
+            } else {
+                alert("Incorrect email or password.");
+            }
+        }
+
+        // Gather User Information
+        function getUserInfo() {
+            const goal = document.getElementById("goal").value;
+            const experience = document.getElementById("experience").value;
+            const equipment = document.getElementById("equipment").value;
+            if (!goal || !experience || !equipment) {
+                alert("Please fill in all fields.");
+                return null;
+            }
+            return { goal, experience, equipment };
+        }
+
+        // Create Workout Plan
+        function generateWorkoutPlan(userInfo) {
+            const workoutPlan = [];
+            // Enhanced workout logic based on user input
+            if (userInfo.goal === "build muscle") {
+                workoutPlan.push({ exercise: "Push-ups", reps: userInfo.experience === "beginner" ? 10 : 20, sets: 3 });
+                workoutPlan.push({ exercise: "Bench Press", reps: 8, sets: 4 });
+            } else if (userInfo.goal === "lose weight") {
+                workoutPlan.push({ exercise: "Burpees", reps: userInfo.experience === "beginner" ? 10 : 15, sets: 3 });
+                workoutPlan.push({ exercise: "Mountain Climbers", reps: 30, sets: 3 });
+            }
+            if (userInfo.equipment.includes("weights")) {
+                workoutPlan.push({ exercise: "Dumbbell Squats", reps: 12, sets: 3 });
+            } else if (userInfo.equipment.includes("resistance bands")) {
+                workoutPlan.push({ exercise: "Band Rows", reps: 15, sets: 3 });
+            }
+
+            workoutPlans[user.email] = workoutPlan;
+            return workoutPlan;
+        }
+
+        // Display Workout Plan
+        function displayWorkoutPlan(workoutPlan) {
+            const workoutSection = document.getElementById("workout-plan-section");
+            workoutSection.innerHTML = "<h3>Your Workout Plan:</h3>";
+            workoutPlan.forEach((exercise) => {
+                workoutSection.innerHTML += `<p>${exercise.exercise}: ${exercise.sets} sets of ${exercise.reps} reps</p>`;
+            });
+            workoutSection.classList.remove("hidden");
+        }
+
+        // Initialize Workout
+        function initWorkout() {
+            const userInfo = getUserInfo();
+            if (userInfo) {
+                const workoutPlan = generateWorkoutPlan(userInfo);
+                displayWorkoutPlan(workoutPlan);
+            }
+        }
+
+        // Log and Display Progress
+        function logProgress() {
+            const exercise = document.getElementById("log-exercise").value;
+            const setsCompleted = parseInt(document.getElementById("log-sets").value);
+            const repsCompleted = parseInt(document.getElementById("log-reps").value);
+            if (!exercise || isNaN(setsCompleted) || isNaN(repsCompleted)) {
+                alert("Please enter valid progress details.");
+                return;
+            }
+            progressLog.push({
+                user: user.email,
+                exercise,
+                setsCompleted,
+                repsCompleted,
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem(`${user.email}-progress`, JSON.stringify(progressLog));
+            alert("Progress logged!");
+        }
+
+        function viewProgress() {
+            const storedProgress = JSON.parse(localStorage.getItem(`${user.email}-progress`)) || [];
+            const progressDisplay = document.getElementById("progress-display");
+            progressDisplay.innerHTML = "<h4>Your Progress Log:</h4>";
+            storedProgress.forEach((entry) => {
+                progressDisplay.innerHTML += `<p>${entry.date}: ${entry.exercise} - ${entry.setsCompleted} sets of ${entry.repsCompleted} reps</p>`;
+            });
+            progressDisplay.classList.remove("hidden");
+        }
+    </script>
+</body>
+
+</html>

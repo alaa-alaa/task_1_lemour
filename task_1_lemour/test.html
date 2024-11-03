@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Fitness App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="my-4">Personalized Workout Plan</h2>
+        <div id="user-info-section">
+            <label>Goal: </label><input id="goal" type="text" class="form-control mb-2"
+                placeholder="e.g., lose weight, build muscle">
+            <label>Experience Level: </label><input id="experience" type="text" class="form-control mb-2"
+                placeholder="beginner, intermediate, advanced">
+            <label>Equipment: </label><input id="equipment" type="text" class="form-control mb-2"
+                placeholder="e.g., weights, resistance bands, bodyweight only">
+            <button onclick="initWorkout()" class="btn btn-primary mt-2">Get Workout Plan</button>
+        </div>
+        <div id="workout-plan-section" class="mt-4"></div>
+        <div id="progress-log-section" class="mt-4">
+            <h3>Log Workout Progress</h3>
+            <label>Exercise: </label><input id="log-exercise" type="text" class="form-control mb-2">
+            <label>Sets Completed: </label><input id="log-sets" type="number" class="form-control mb-2">
+            <label>Reps Completed: </label><input id="log-reps" type="number" class="form-control mb-2">
+            <button onclick="logProgress()" class="btn btn-success mt-2">Log Progress</button>
+            <button onclick="viewProgress()" class="btn btn-info mt-2">View Progress</button>
+        </div>
+        <div id="progress-display" class="mt-4"></div>
+    </div>
+
+    <script>
+        // Gather User Information
+        function getUserInfo() {
+            const goal = document.getElementById("goal").value;
+            const experience = document.getElementById("experience").value;
+            const equipment = document.getElementById("equipment").value;
+            if (!goal || !experience || !equipment) {
+                alert("Please fill in all fields.");
+                return null;
+            }
+            return { goal, experience, equipment };
+        }
+
+        // Create Workout Plan
+        function generateWorkoutPlan(userInfo) {
+            let workoutPlan = [];
+            if (userInfo.goal === "build muscle") {
+                workoutPlan.push({ exercise: "Push-ups", reps: userInfo.experience === "beginner" ? 10 : 20, sets: 3 });
+            } else if (userInfo.goal === "lose weight") {
+                workoutPlan.push({ exercise: "Burpees", reps: userInfo.experience === "beginner" ? 10 : 15, sets: 3 });
+            }
+            if (userInfo.equipment.includes("weights")) {
+                workoutPlan.push({ exercise: "Dumbbell Squats", reps: 12, sets: 3 });
+            } else if (userInfo.equipment.includes("resistance bands")) {
+                workoutPlan.push({ exercise: "Band Rows", reps: 15, sets: 3 });
+            }
+            return workoutPlan;
+        }
+
+        // Display Workout Plan
+        function displayWorkoutPlan(workoutPlan) {
+            const workoutSection = document.getElementById("workout-plan-section");
+            workoutSection.innerHTML = "<h3>Your Workout Plan:</h3>";
+            workoutPlan.forEach((exercise) => {
+                workoutSection.innerHTML += `<p>${exercise.exercise}: ${exercise.sets} sets of ${exercise.reps} reps</p>`;
+            });
+        }
+
+        // Track Progress
+        let progressLog = [];
+
+        function logProgress() {
+            const exercise = document.getElementById("log-exercise").value;
+            const setsCompleted = parseInt(document.getElementById("log-sets").value);
+            const repsCompleted = parseInt(document.getElementById("log-reps").value);
+            if (!exercise || isNaN(setsCompleted) || isNaN(repsCompleted)) {
+                alert("Please enter valid progress details.");
+                return;
+            }
+            progressLog.push({
+                exercise,
+                setsCompleted,
+                repsCompleted,
+                date: new Date().toLocaleDateString()
+            });
+            alert("Progress logged!");
+        }
+
+        function viewProgress() {
+            const progressDisplay = document.getElementById("progress-display");
+            progressDisplay.innerHTML = "<h4>Your Progress Log:</h4>";
+            progressLog.forEach((entry) => {
+                progressDisplay.innerHTML += `<p>${entry.date}: ${entry.exercise} - ${entry.setsCompleted} sets of ${entry.repsCompleted} reps</p>`;
+            });
+        }
+
+        // Initialize Workout
+        function initWorkout() {
+            const userInfo = getUserInfo();
+            if (userInfo) {
+                const workoutPlan = generateWorkoutPlan(userInfo);
+                displayWorkoutPlan(workoutPlan);
+            }
+        }
+    </script>
+</body>
+
+</html>

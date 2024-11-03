@@ -1,0 +1,17 @@
+<div id="custom-exercise-section" class="hidden">
+    <h4>Add Custom Exercise:</h4>
+    <label>Exercise Name: </label><input id="custom-exercise-name" type="text" class="form-control mb-2">
+    <label>Reps: </label><input id="custom-exercise-reps" type="number" class="form-control mb-2">
+    <label>Sets: </label><input id="custom-exercise-sets" type="number" class="form-control mb-2">
+    <label>Notes: </label><input id="custom-exercise-notes" type="text" class="form-control mb-2">
+    <button onclick="addCustomExercise()" class="btn btn-primary mt-2">Add Exercise</button>
+</div>
+
+<div id="calorie-tracking-section" class="hidden">
+    <h4>Calorie Tracking:</h4>
+    <label>Calorie Target: </label><input id="calorie-target" type="number" class="form-control mb-2">
+    <button onclick="setCalorieTarget()" class="btn btn-primary mt-2">Set Calorie Target</button>
+    <label>Daily Calorie Intake: </label><input id="daily-calorie-intake" type="number" class="form-control mb-2">
+    <button onclick="logCalorieIntake()" class="btn btn-primary mt-2">Log Calorie Intake</button>
+    <div id="calorie-display" class="hidden"></div>
+</div>

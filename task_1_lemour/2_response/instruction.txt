@@ -1,0 +1,39 @@
+Here are some test cases that can be used to validate the functionality of the application:
+
+Register a new user:
+Enter a valid email address and password.
+Click the "Register" button.
+Check that the user is registered successfully and can log in.
+Login an existing user:
+Enter a valid email address and password.
+Click the "Login" button.
+Check that the user is logged in successfully and can access the workout plan section.
+Get user information:
+Select a goal, experience level, and equipment.
+Click the "Get Workout Plan" button.
+Check that the user information is displayed correctly.
+Generate a workout plan:
+Select a goal, experience level, and equipment.
+Click the "Get Workout Plan" button.
+Check that a workout plan is generated and displayed correctly.
+Log workout progress:
+Enter an exercise, sets, and reps.
+Click the "Log Progress" button.
+Check that the progress is logged correctly and displayed in the progress display section.
+View workout progress:
+Click the "View Progress" button.
+Check that the progress is displayed correctly in the progress display section.
+README.md
+
+Advanced Fitness App
+A personalized fitness app that generates a workout plan based on user goals and experience level.
+
+Description
+This app allows users to register and log in to access their personalized workout plan. The workout plan is generated based on the user's goals, experience level, and equipment available. Users can log their progress and view their workout history.
+
+Steps to Run the Code
+Open the index.html file in a web browser.
+Register a new user or log in to an existing account.
+Select a goal, experience level, and equipment to generate a workout plan.
+Log workout progress and view workout history.
+Note: This app uses local storage to store user data, so it will only work in a web browser that supports local storage.
